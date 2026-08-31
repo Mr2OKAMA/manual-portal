@@ -1,13 +1,20 @@
 const state = { query: "", category: "" };
 const STORAGE_KEY = "manual-hub-documents";
+let categories = [];
 
-// Replace this loader with a SharePoint REST API adapter when the data source changes.
 async function loadDocuments() {
+  const response = await fetch("manuals.json");
+  if (!response.ok) throw new Error("手順書メタデータを読み込めませんでした。");
+  const metadata = await response.json();
+  if (!Array.isArray(metadata.categories) || !Array.isArray(metadata.documents)) {
+    throw new Error("手順書メタデータの形式が不正です。");
+  }
+  categories = metadata.categories;
   const savedDocuments = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
   const removedNumbers = new Set(savedDocuments.filter((item) => item.deleted).map((item) => item.no));
   const dateOverrides = new Map(savedDocuments.filter((item) => item.override).map((item) => [item.no, item.date]));
   const addedDocuments = savedDocuments.filter((item) => !item.deleted && !item.override);
-  const baseDocuments = documents.filter((item) => !removedNumbers.has(item.no)).map((item) => ({ ...item, date: dateOverrides.get(item.no) || item.date }));
+  const baseDocuments = metadata.documents.filter((item) => !removedNumbers.has(item.no)).map((item) => ({ ...item, date: dateOverrides.get(item.no) || item.date }));
   return [...baseDocuments, ...addedDocuments];
 }
 
@@ -87,5 +94,9 @@ async function initialize() {
   });
 }
 
-initialize();
-
+initialize().catch((error) => {
+  console.error(error);
+  elements.empty.hidden = false;
+  elements.empty.querySelector("strong").textContent = "手順書情報を読み込めませんでした";
+  elements.empty.querySelector("p").textContent = "manuals.json の内容と公開設定を確認してください。";
+});
