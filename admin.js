@@ -14,13 +14,37 @@ function persist(items) {
 }
 
 async function loadMetadata() {
-  const response = await fetch("manuals.json");
-  if (!response.ok) throw new Error("手順書メタデータを読み込めませんでした。");
-  const loadedMetadata = await response.json();
-  if (!Array.isArray(loadedMetadata.categories) || !Array.isArray(loadedMetadata.documents)) {
-    throw new Error("手順書メタデータの形式が不正です。");
+  try {
+    // 複数のパス解決方法を試す
+    let response;
+    const paths = [
+      "./manuals.json",
+      "/manuals.json",
+      new URL("manuals.json", import.meta.url || window.location.href).href
+    ];
+
+    for (const path of paths) {
+      try {
+        response = await fetch(path);
+        if (response.ok) break;
+      } catch (e) {
+        // 次のパスを試す
+        continue;
+      }
+    }
+
+    if (!response || !response.ok) {
+      throw new Error("手順書メタデータを読み込めませんでした。manuals.json がHTMLと同じディレクトリにあることを確認してください。");
+    }
+    
+    const loadedMetadata = await response.json();
+    if (!Array.isArray(loadedMetadata.categories) || !Array.isArray(loadedMetadata.documents)) {
+      throw new Error("手順書メタデータの形式が不正です。");
+    }
+    metadata = loadedMetadata;
+  } catch (error) {
+    throw new Error(`メタデータ読み込みエラー: ${error.message}`);
   }
-  metadata = loadedMetadata;
 }
 
 function allDocuments() {
@@ -38,7 +62,7 @@ function renderList() {
   const query = search.value.toLocaleLowerCase("ja-JP").replace(/\s/g, "");
   const filteredDocuments = allDocuments().filter((item) => !query || `${item.no}${item.title}${item.categoryName}`.toLocaleLowerCase("ja-JP").replace(/\s/g, "").includes(query));
   resultCount.textContent = `${filteredDocuments.length}件`;
-  list.innerHTML = filteredDocuments.map((item) => `<div class="admin-list__item"><div><strong>${item.no}</strong><span>${item.title}</span><small>${item.categoryName}</small></div><label class="date-editor">改訂日<input type="date" value="${item.date}" data-date-no="${item.no}"></label><button class="date-button" type="button" data-save-date="${item.no}">更新</button><button class="delete-button" type="button" data-no="${item.no}">削除</button></div>`).join("");
+  list.innerHTML = filteredDocuments.map((item) => `<div class="admin-list__item"><div><strong>${item.no}</strong><span>${item.title}</span><small>${item.categoryName}</small></div><label class="date-editor"><span>改訂日</span><input type="date" data-date-no="${item.no}" value="${item.date}"></label><button class="date-button" data-save-date="${item.no}">保存</button><button class="delete-button" data-no="${item.no}">削除</button></div>`).join("");
   empty.hidden = filteredDocuments.length !== 0;
   list.querySelectorAll(".delete-button").forEach((button) => button.addEventListener("click", () => removeDocument(button.dataset.no)));
   list.querySelectorAll("[data-save-date]").forEach((button) => button.addEventListener("click", () => updateDate(button.dataset.saveDate)));
@@ -88,15 +112,17 @@ function registerDocument(event) {
 }
 
 async function initialize() {
-  await loadMetadata();
-  renderCategories();
-  renderList();
-  form.addEventListener("submit", registerDocument);
-  search.addEventListener("input", renderList);
+  try {
+    await loadMetadata();
+    renderCategories();
+    renderList();
+    form.addEventListener("submit", registerDocument);
+    search.addEventListener("input", renderList);
+  } catch (error) {
+    console.error(error);
+    message.textContent = error.message || "手順書情報を読み込めませんでした。";
+    message.className = "form-message form-message--error";
+  }
 }
 
-initialize().catch((error) => {
-  console.error(error);
-  message.textContent = "手順書情報を読み込めませんでした。manuals.json を確認してください。";
-  message.className = "form-message form-message--error";
-});
+initialize();
