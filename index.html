@@ -1,1 +1,63 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="工場・プラント向けマニュアル管理ポータル">
+  <title>Manual Hub | マニュアル管理ポータル</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+JP:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar__inner">
+      <a class="brand" href="index.html" aria-label="Manual Hub ホーム">
+        <span class="brand__mark" aria-hidden="true">M</span>
+        <span><strong>MANUAL HUB</strong><small>Operations knowledge base</small></span>
+      </a>
+      <div class="topbar__context"><span class="status-dot"></span> PLANT / OPERATIONS <span class="divider"></span> <a class="admin-nav" href="admin.html">管理画面 ↗</a></div>
+    </div>
+  </header>
+
+  <main class="page-shell">
+    <section class="intro" aria-labelledby="page-title">
+      <div>
+        <p class="eyebrow">DOCUMENT CONTROL CENTER</p>
+        <h1 id="page-title">マニュアルを検索する</h1>
+        <p class="intro__copy">現場で必要な手順書を、文書番号やタイトルからすばやく開けます。</p>
+      </div>
+      <div class="intro__meta"><span class="meta-label">LAST SYNCHRONIZED</span><strong>2026.08.27</strong></div>
+    </section>
+
+    <section class="dashboard" aria-label="マニュアル件数">
+      <div class="dashboard__total"><span class="total-label">TOTAL DOCUMENTS</span><strong id="total-count">0</strong><span>件</span></div>
+      <div id="category-summary" class="category-summary"></div>
+    </section>
+
+    <section class="workspace" aria-label="マニュアル一覧">
+      <div class="toolbar">
+        <div class="search-field">
+          <svg aria-hidden="true" viewBox="0 0 24 24"><path d="m21 21-4.35-4.35m2.1-5.4a7.5 7.5 0 1 1-15 0 7.5 7.5 0 0 1 15 0Z"/></svg>
+          <input id="search-input" type="search" placeholder="文書番号、タイトルで検索" autocomplete="off">
+          <kbd>/</kbd>
+        </div>
+        <label class="filter-field" for="category-filter"><span>分類</span><select id="category-filter"><option value="">全分類</option></select></label>
+      </div>
+      <div class="results-bar"><p id="results-label">マニュアル一覧</p><span id="result-count">0件</span></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th scope="col">文書番号</th><th scope="col">分類</th><th scope="col">タイトル</th><th scope="col">改訂日</th><th scope="col" class="action-column">開く</th></tr></thead>
+          <tbody id="manual-list"></tbody>
+        </table>
+        <div id="empty-state" class="empty-state" hidden><span class="empty-state__icon">⌕</span><strong>該当するマニュアルがありません</strong><p>検索語または分類を変更してお試しください。</p></div>
+      </div>
+    </section>
+  </main>
+  <footer><span>MANUAL HUB</span><span>Internal knowledge portal</span></footer>
+  <script src="manuals.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
 
