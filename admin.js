@@ -1,4 +1,5 @@
 const STORAGE_KEY = "manual-hub-documents";
+let metadata = { categories: [], documents: [] };
 const savedDocuments = () => JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
 const categorySelect = document.querySelector("#admin-category");
 const form = document.querySelector("#manual-form");
@@ -12,15 +13,25 @@ function persist(items) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
 }
 
+async function loadMetadata() {
+  const response = await fetch("manuals.json");
+  if (!response.ok) throw new Error("手順書メタデータを読み込めませんでした。");
+  const loadedMetadata = await response.json();
+  if (!Array.isArray(loadedMetadata.categories) || !Array.isArray(loadedMetadata.documents)) {
+    throw new Error("手順書メタデータの形式が不正です。");
+  }
+  metadata = loadedMetadata;
+}
+
 function allDocuments() {
   const saved = savedDocuments();
   const removed = new Set(saved.filter((item) => item.deleted).map((item) => item.no));
   const dateOverrides = new Map(saved.filter((item) => item.override).map((item) => [item.no, item.date]));
-  return [...documents.filter((item) => !removed.has(item.no)).map((item) => ({ ...item, date: dateOverrides.get(item.no) || item.date })), ...saved.filter((item) => !item.deleted && !item.override)];
+  return [...metadata.documents.filter((item) => !removed.has(item.no)).map((item) => ({ ...item, date: dateOverrides.get(item.no) || item.date })), ...saved.filter((item) => !item.deleted && !item.override)];
 }
 
 function renderCategories() {
-  categorySelect.innerHTML = categories.map(({ code, name }) => `<option value="${code}">${code} ${name}</option>`).join("");
+  categorySelect.innerHTML = metadata.categories.map(({ code, name }) => `<option value="${code}">${code} ${name}</option>`).join("");
 }
 
 function renderList() {
@@ -38,7 +49,7 @@ function updateDate(no) {
   if (!input.value) return;
   const target = allDocuments().find((item) => item.no === no);
   const saved = savedDocuments().filter((item) => item.no !== no && !(item.override && item.no === no));
-  if (documents.some((item) => item.no === no)) {
+  if (metadata.documents.some((item) => item.no === no)) {
     saved.push({ no, date: input.value, override: true });
   } else {
     saved.push({ ...target, date: input.value });
@@ -53,15 +64,15 @@ function removeDocument(no) {
   const target = allDocuments().find((item) => item.no === no);
   if (!target || !window.confirm(`「${target.title}」を削除しますか？`)) return;
   const saved = savedDocuments().filter((item) => item.no !== no);
-  if (documents.some((item) => item.no === no)) saved.push({ no, deleted: true });
+  if (metadata.documents.some((item) => item.no === no)) saved.push({ no, deleted: true });
   persist(saved);
   renderList();
 }
 
-form.addEventListener("submit", (event) => {
+function registerDocument(event) {
   event.preventDefault();
   const formData = new FormData(form);
-  const category = categories.find((item) => item.code === formData.get("category"));
+  const category = metadata.categories.find((item) => item.code === formData.get("category"));
   const item = { no: formData.get("no").trim(), category: category.code, categoryName: category.name, title: formData.get("title").trim(), date: formData.get("date"), url: formData.get("url").trim() };
   if (!form.reportValidity()) return;
   if (allDocuments().some((document) => document.no === item.no)) {
@@ -74,8 +85,18 @@ form.addEventListener("submit", (event) => {
   message.textContent = "登録しました。一覧画面に反映されています。";
   message.className = "form-message form-message--success";
   renderList();
-});
+}
 
-renderCategories();
-renderList();
-search.addEventListener("input", renderList);
+async function initialize() {
+  await loadMetadata();
+  renderCategories();
+  renderList();
+  form.addEventListener("submit", registerDocument);
+  search.addEventListener("input", renderList);
+}
+
+initialize().catch((error) => {
+  console.error(error);
+  message.textContent = "手順書情報を読み込めませんでした。manuals.json を確認してください。";
+  message.className = "form-message form-message--error";
+});
