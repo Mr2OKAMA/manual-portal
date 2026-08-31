@@ -3,19 +3,28 @@ const STORAGE_KEY = "manual-hub-documents";
 let categories = [];
 
 async function loadDocuments() {
-  const response = await fetch("manuals.json");
-  if (!response.ok) throw new Error("手順書メタデータを読み込めませんでした。");
-  const metadata = await response.json();
-  if (!Array.isArray(metadata.categories) || !Array.isArray(metadata.documents)) {
-    throw new Error("手順書メタデータの形式が不正です。");
+  try {
+    const response = await fetch("./manuals.json");
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: manuals.json が見つかりません。リポジトリルートで python3 -m http.server 8000 を実行してください。`);
+    }
+    
+    const metadata = await response.json();
+    if (!Array.isArray(metadata.categories) || !Array.isArray(metadata.documents)) {
+      throw new Error("手順書メタデータの形式が不正です。");
+    }
+    categories = metadata.categories;
+    
+    const savedDocuments = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+    const removedNumbers = new Set(savedDocuments.filter((item) => item.deleted).map((item) => item.no));
+    const dateOverrides = new Map(savedDocuments.filter((item) => item.override).map((item) => [item.no, item.date]));
+    const addedDocuments = savedDocuments.filter((item) => !item.deleted && !item.override);
+    const baseDocuments = metadata.documents.filter((item) => !removedNumbers.has(item.no)).map((item) => ({ ...item, date: dateOverrides.get(item.no) || item.date }));
+    return [...baseDocuments, ...addedDocuments];
+  } catch (error) {
+    console.error("Error loading documents:", error);
+    throw error;
   }
-  categories = metadata.categories;
-  const savedDocuments = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-  const removedNumbers = new Set(savedDocuments.filter((item) => item.deleted).map((item) => item.no));
-  const dateOverrides = new Map(savedDocuments.filter((item) => item.override).map((item) => [item.no, item.date]));
-  const addedDocuments = savedDocuments.filter((item) => !item.deleted && !item.override);
-  const baseDocuments = metadata.documents.filter((item) => !removedNumbers.has(item.no)).map((item) => ({ ...item, date: dateOverrides.get(item.no) || item.date }));
-  return [...baseDocuments, ...addedDocuments];
 }
 
 const elements = {
@@ -73,30 +82,32 @@ function renderList(items) {
 }
 
 async function initialize() {
-  const loadedDocuments = await loadDocuments();
-  renderCategoryOptions();
-  renderSummary(loadedDocuments);
-  renderList(loadedDocuments);
+  try {
+    const loadedDocuments = await loadDocuments();
+    renderCategoryOptions();
+    renderSummary(loadedDocuments);
+    renderList(loadedDocuments);
 
-  elements.search.addEventListener("input", (event) => {
-    state.query = event.target.value;
-    renderList(loadedDocuments);
-  });
-  elements.filter.addEventListener("change", (event) => {
-    state.category = event.target.value;
-    renderList(loadedDocuments);
-  });
-  document.addEventListener("keydown", (event) => {
-    if (event.key === "/" && document.activeElement !== elements.search) {
-      event.preventDefault();
-      elements.search.focus();
-    }
-  });
+    elements.search.addEventListener("input", (event) => {
+      state.query = event.target.value;
+      renderList(loadedDocuments);
+    });
+    elements.filter.addEventListener("change", (event) => {
+      state.category = event.target.value;
+      renderList(loadedDocuments);
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "/" && document.activeElement !== elements.search) {
+        event.preventDefault();
+        elements.search.focus();
+      }
+    });
+  } catch (error) {
+    console.error(error);
+    elements.empty.hidden = false;
+    elements.empty.querySelector("strong").textContent = "手順書情報を読み込めませんでした";
+    elements.empty.querySelector("p").textContent = error.message || "manuals.json の内容と公開設定を確認してください。";
+  }
 }
 
-initialize().catch((error) => {
-  console.error(error);
-  elements.empty.hidden = false;
-  elements.empty.querySelector("strong").textContent = "手順書情報を読み込めませんでした";
-  elements.empty.querySelector("p").textContent = "manuals.json の内容と公開設定を確認してください。";
-});
+initialize();
