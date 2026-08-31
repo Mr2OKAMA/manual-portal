@@ -16,9 +16,9 @@
 
 ## Site administration
 
-一覧画面右上の「管理画面」から `admin.html` を開きます。文書番号、分類、タイトル、改訂日、SharePoint URLを入力して登録すると、一覧画面へ反映されます。登録済み手順書は文書番号・タイトル・分類で検索でき、改訂日は各行の日付欄を変更して「更新」を押すと反映されます。削除も同じ画面から実行できます。
+一覧画面右上の「管理画面」から `admin.html` を開きます。文書番号、分類、タイトル、改訂日、SharePoint URLを入力して登録すると、一覧画面へ反映されます。
 
-GitHub Pagesは静的ホスティングのため、管理画面での変更は操作したブラウザの `localStorage` に保存されるプレビュー用の差分です。全ユーザーで共有する手順書情報は `manuals.json` を更新してリポジトリへコミットし、公開してください。
+GitHub Pagesは静的ホスティングのため、管理画面での変更は操作したブラウザの `localStorage` に保存されるプレビュー用の差分です。全ユーザーで共有するには、`manuals.json` を直接編集してコミットする必要があります。
 
 ## Data maintenance
 
@@ -78,7 +78,7 @@ python3 -m json.tool manuals.json
 `manuals.json` を読み込むため、リポジトリのルートで次のコマンドを実行します。
 
 ```bash
-python3 -m http.server 8000
+python3 -m http.server 9000
 ```
 
-その後、`http://localhost:8000` を開いてください。
+その後、`http://localhost:9000` を開いてください。
