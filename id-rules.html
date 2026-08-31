@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="マニュアル管理番号の命名ルール">
+  <title>管理番号ルール | Manual Hub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+JP:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar__inner">
+      <a class="brand" href="index.html" aria-label="Manual Hub ホーム">
+        <span class="brand__mark" aria-hidden="true">M</span>
+        <span><strong>MANUAL HUB</strong><small>Operations knowledge base</small></span>
+      </a>
+      <div class="topbar__context"><span class="status-dot"></span> PLANT / OPERATIONS <span class="divider"></span> <a class="back-link" href="index.html">← 一覧へ戻る</a></div>
+    </div>
+  </header>
+
+  <main class="page-shell">
+    <section class="intro" aria-labelledby="page-title">
+      <div>
+        <p class="eyebrow">DOCUMENT NUMBERING RULES</p>
+        <h1 id="page-title">管理番号記入ルール</h1>
+        <p class="intro__copy">電気班安全作業標準の書式に基づく、マニュアル管理番号の採番ルールです。</p>
+      </div>
+    </section>
+
+    <section class="admin-panel" aria-label="管理番号の構成例">
+      <div class="panel-heading">
+        <span class="panel-index">1</span>
+        <div>
+          <h2>管理番号記入例</h2>
+          <p>管理番号は「作業種別＋定常区分＋点検種別」「施設番号」「昇順番号」をハイフンでつなげた形式です。</p>
+        </div>
+      </div>
+      <table>
+        <thead><tr><th scope="col">記入例</th><th scope="col">構成要素</th><th scope="col">説明</th></tr></thead>
+        <tbody>
+          <tr><td class="document-number">ET</td><td>作業種別 + 定常区分</td><td>1文字目が作業種別、2文字目が定常／非定常の区分（例: E=電気点検作業、T=定常作業）</td></tr>
+          <tr><td class="document-number">06</td><td>点検種別</td><td>点検の周期（例: 06=6ヶ月点検）</td></tr>
+          <tr><td class="document-number">01</td><td>施設番号</td><td>対象施設のコード（例: 01=流入ポンプ棟）</td></tr>
+          <tr><td class="document-number">01</td><td>昇順番号</td><td>その施設から始まる昇順の連番</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="admin-panel" aria-label="作業種別コード" style="margin-top: 25px;">
+      <div class="panel-heading">
+        <span class="panel-index">2</span>
+        <div>
+          <h2>作業種別コード</h2>
+          <p>管理番号1文字目に使用します。</p>
+        </div>
+      </div>
+      <table>
+        <thead><tr><th scope="col">コード</th><th scope="col">意味</th></tr></thead>
+        <tbody>
+          <tr><td class="document-number">M</td><td>保守点検作業</td></tr>
+          <tr><td class="document-number">W</td><td>水処理作業</td></tr>
+          <tr><td class="document-number">E</td><td>電気点検作業</td></tr>
+          <tr><td class="document-number">C</td><td>中央作業</td></tr>
+          <tr><td class="document-number">N</td><td>日常点検</td></tr>
+          <tr><td class="document-number">S</td><td>週点検</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="admin-panel" aria-label="定常区分コード" style="margin-top: 25px;">
+      <div class="panel-heading">
+        <span class="panel-index">3</span>
+        <div>
+          <h2>定常区分コード</h2>
+          <p>管理番号2文字目に使用します。</p>
+        </div>
+      </div>
+      <table>
+        <thead><tr><th scope="col">コード</th><th scope="col">意味</th></tr></thead>
+        <tbody>
+          <tr><td class="document-number">T</td><td>定常作業</td></tr>
+          <tr><td class="document-number">H</td><td>非定常作業</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="admin-panel" aria-label="点検種別コード" style="margin-top: 25px;">
+      <div class="panel-heading">
+        <span class="panel-index">4</span>
+        <div>
+          <h2>点検種別コード</h2>
+          <p>管理番号の最初のハイフンの前、2桁の数字部分に使用します。</p>
+        </div>
+      </div>
+      <table>
+        <thead><tr><th scope="col">コード</th><th scope="col">意味</th></tr></thead>
+        <tbody>
+          <tr><td class="document-number">00</td><td>非定常作業</td></tr>
+          <tr><td class="document-number">01</td><td>月点検</td></tr>
+          <tr><td class="document-number">06</td><td>6ヶ月点検</td></tr>
+          <tr><td class="document-number">12</td><td>年次点検</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="admin-panel" aria-label="施設番号コード" style="margin-top: 25px;">
+      <div class="panel-heading">
+        <span class="panel-index">5</span>
+        <div>
+          <h2>施設番号コード</h2>
+          <p>管理番号中央の2桁の数字部分に使用します。新しい施設が増設された場合は23から順に増やします。</p>
+        </div>
+      </div>
+      <table>
+        <thead><tr><th scope="col">コード</th><th scope="col">施設名</th></tr></thead>
+        <tbody>
+          <tr><td class="document-number">01</td><td>流入ポンプ棟</td></tr>
+          <tr><td class="document-number">02</td><td>1系水処理</td></tr>
+          <tr><td class="document-number">03</td><td>2系水処理</td></tr>
+          <tr><td class="document-number">04</td><td>3系水処理</td></tr>
+          <tr><td class="document-number">05</td><td>4系水処理</td></tr>
+          <tr><td class="document-number">06</td><td>送風機棟</td></tr>
+          <tr><td class="document-number">07</td><td>ろ過池（Ⅰ-1）</td></tr>
+          <tr><td class="document-number">08</td><td>ろ過池（Ⅰ-2）</td></tr>
+          <tr><td class="document-number">09</td><td>ろ過池（Ⅱ-1）</td></tr>
+          <tr><td class="document-number">10</td><td>ろ過池（Ⅱ-2）</td></tr>
+          <tr><td class="document-number">11</td><td>放流・雨水放流ポンプ棟</td></tr>
+          <tr><td class="document-number">12</td><td>管理本館</td></tr>
+          <tr><td class="document-number">13</td><td>公園・備蓄倉庫</td></tr>
+          <tr><td class="document-number">14</td><td>長森ポンプ場</td></tr>
+          <tr><td class="document-number">15</td><td>岐南ポンプ場</td></tr>
+          <tr><td class="document-number">16</td><td>川島ポンプ場</td></tr>
+          <tr><td class="document-number">17</td><td>兼山ポンプ場</td></tr>
+          <tr><td class="document-number">18</td><td>境川放流口</td></tr>
+          <tr><td class="document-number">19</td><td>汚泥棟</td></tr>
+          <tr><td class="document-number">20</td><td>機械濃縮棟</td></tr>
+          <tr><td class="document-number">21</td><td>特別高圧受変電棟</td></tr>
+          <tr><td class="document-number">22</td><td>受配電棟</td></tr>
+        </tbody>
+      </table>
+      <div class="notice"><strong>注意</strong><span>新しい施設が増設された場合は23から順に番号を増やしていきます。改定日は最新のものだけを記入します。</span></div>
+    </section>
+  </main>
+  <footer><span>MANUAL HUB</span><span>Internal knowledge portal</span></footer>
+</body>
+</html>
