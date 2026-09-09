@@ -1,126 +1,59 @@
-const STORAGE_KEY = "manual-hub-documents";
-let metadata = { categories: [], documents: [] };
-const savedDocuments = () => JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-const categorySelect = document.querySelector("#admin-category");
-const form = document.querySelector("#manual-form");
-const list = document.querySelector("#admin-list");
-const message = document.querySelector("#form-message");
-const search = document.querySelector("#admin-search");
-const resultCount = document.querySelector("#admin-result-count");
-const empty = document.querySelector("#admin-empty");
-
-function persist(items) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-}
-
-function demoRiskAssessmentUrl(no) {
-  return `https://sharepoint.example.com/risk-assessments/${no}`;
-}
-
-async function loadMetadata() {
-  try {
-    const response = await fetch("./manuals.json");
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: manuals.json が見つかりません。リポジトリルートで python3 -m http.server 8000 を実行してください。`);
-    }
-    const loadedMetadata = await response.json();
-    if (!Array.isArray(loadedMetadata.categories) || !Array.isArray(loadedMetadata.documents)) {
-      throw new Error("手順書メタデータの形式が不正です。categories と documents は配列である必要があります。");
-    }
-    metadata = loadedMetadata;
-  } catch (error) {
-    console.error("Metadata loading error:", error);
-    throw new Error(`メタデータ読み込みエラー: ${error.message}`);
-  }
-}
-
-function allDocuments() {
-  const saved = savedDocuments();
-  const removed = new Set(saved.filter((item) => item.deleted).map((item) => item.no));
-  const dateOverrides = new Map(saved.filter((item) => item.override).map((item) => [item.no, item.date]));
-  return [...metadata.documents.filter((item) => !removed.has(item.no)).map((item) => ({ ...item, date: dateOverrides.get(item.no) || item.date })), ...saved.filter((item) => !item.deleted && !item.override)];
-}
-
-function renderCategories() {
-  categorySelect.innerHTML = metadata.categories.map(({ code, name }) => `<option value="${code}">${code} ${name}</option>`).join("");
-}
-
-function renderList() {
-  const query = search.value.toLocaleLowerCase("ja-JP").replace(/\s/g, "");
-  const filteredDocuments = allDocuments().filter((item) => !query || `${item.no}${item.title}${item.categoryName}`.toLocaleLowerCase("ja-JP").replace(/\s/g, "").includes(query));
-  resultCount.textContent = `${filteredDocuments.length}件`;
-  list.innerHTML = filteredDocuments.map((item) => {
-    const riskAssessmentUrl = item.riskAssessmentUrl || demoRiskAssessmentUrl(item.no);
-    return `<div class="admin-list__item"><div><strong>${item.no}</strong><span>${item.title}</span><small>${item.categoryName}</small></div><label class="date-field">改訂日<input data-date-no="${item.no}" type="date" value="${item.date}"></label><a class="open-link" href="${item.url}" target="_blank" rel="noopener noreferrer">手順書を開く <span aria-hidden="true">↗</span></a><a class="open-link" href="${riskAssessmentUrl}" target="_blank" rel="noopener noreferrer">RAを開く <span aria-hidden="true">↗</span></a><div class="item-actions"><button type="button" class="secondary-button" data-save-date="${item.no}">保存</button><button type="button" class="delete-button" data-no="${item.no}">削除</button></div></div>`;
-  }).join("");
-  empty.hidden = filteredDocuments.length !== 0;
-  list.querySelectorAll(".delete-button").forEach((button) => button.addEventListener("click", () => removeDocument(button.dataset.no)));
-  list.querySelectorAll("[data-save-date]").forEach((button) => button.addEventListener("click", () => updateDate(button.dataset.saveDate)));
-}
-
-function updateDate(no) {
-  const input = list.querySelector(`[data-date-no="${no}"]`);
-  if (!input.value) return;
-  const target = allDocuments().find((item) => item.no === no);
-  const saved = savedDocuments().filter((item) => item.no !== no && !(item.override && item.no === no));
-  if (metadata.documents.some((item) => item.no === no)) {
-    saved.push({ no, date: input.value, override: true });
-  } else {
-    saved.push({ ...target, date: input.value });
-  }
-  persist(saved);
-  renderList();
-  message.textContent = "改訂日を更新しました。一覧画面にも反映されています。";
-  message.className = "form-message form-message--success";
-}
-
-function removeDocument(no) {
-  const target = allDocuments().find((item) => item.no === no);
-  if (!target || !window.confirm(`「${target.title}」を削除しますか？`)) return;
-  const saved = savedDocuments().filter((item) => item.no !== no);
-  if (metadata.documents.some((item) => item.no === no)) saved.push({ no, deleted: true });
-  persist(saved);
-  renderList();
-}
-
-function registerDocument(event) {
-  event.preventDefault();
-  const formData = new FormData(form);
-  const category = metadata.categories.find((item) => item.code === formData.get("category"));
-  const item = {
-    no: formData.get("no").trim(),
-    category: category.code,
-    categoryName: category.name,
-    title: formData.get("title").trim(),
-    date: formData.get("date"),
-    url: formData.get("url").trim(),
-    riskAssessmentUrl: formData.get("riskAssessmentUrl").trim() || demoRiskAssessmentUrl(formData.get("no").trim())
-  };
-  if (!form.reportValidity()) return;
-  if (allDocuments().some((document) => document.no === item.no)) {
-    message.textContent = "この文書番号はすでに登録されています。";
-    message.className = "form-message form-message--error";
-    return;
-  }
-  persist([...savedDocuments().filter((document) => document.no !== item.no), item]);
-  form.reset();
-  message.textContent = "登録しました。一覧画面に反映されています。";
-  message.className = "form-message form-message--success";
-  renderList();
-}
-
-async function initialize() {
-  try {
-    await loadMetadata();
-    renderCategories();
-    renderList();
-    form.addEventListener("submit", registerDocument);
-    search.addEventListener("input", renderList);
-  } catch (error) {
-    console.error(error);
-    message.textContent = error.message || "手順書情報を読み込めませんでした。";
-    message.className = "form-message form-message--error";
-  }
-}
-
-initialize();
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Manual Hub マニュアル管理画面">
+  <title>Manual Hub | マニュアル管理</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+JP:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar"><div class="topbar__inner">
+    <a class="brand" href="index.html" aria-label="Manual Hub ホーム"><span class="brand__mark" aria-hidden="true">M</span><span><strong>MANUAL HUB</strong><small>Operations knowledge base</small></span></a>
+    <div class="topbar__context"><a class="admin-nav" href="id-rules.html">管理番号ルール ↗</a> <span class="divider"></span> <a class="back-link" href="index.html">← 一覧へ戻る</a></div>
+  </div></header>
+  <main class="page-shell admin-shell">
+    <section class="intro"><div><p class="eyebrow">DOCUMENT ADMINISTRATION</p><h1>マニュアルを管理する</h1><p class="intro__copy">新しい手順書の登録と、登録済み手順書の改訂日更新・削除ができます。</p></div></section>
+    <div class="admin-grid">
+      <section class="admin-panel" aria-labelledby="add-heading">
+        <div class="panel-heading"><span class="panel-index">01</span><div><h2 id="add-heading">新規手順書を登録</h2><p>すべての項目を入力してください。</p></div></div>
+        <form id="manual-form" novalidate>
+          <label>文書番号<input name="no" required placeholder="例: 01-004"></label>
+          <label>分類<select name="category" id="admin-category" required></select></label>
+          <label>タイトル<input name="title" required placeholder="例: ポンプ停止手順"></label>
+          <label>改訂日<input name="date" type="date" required></label>
+          <label>マニュアル本体 URL<input name="url" type="url" required placeholder="https://..."></label>
+          <label>リスクアセスメント URL<input name="riskAssessmentUrl" type="url" placeholder="https://... (オプション)"></label>
+          <button class="primary-button" type="submit"><span aria-hidden="true">＋</span> 手順書を登録</button>
+          <p id="form-message" class="form-message" role="status"></p>
+        </form>
+      </section>
+      <section class="admin-panel admin-panel--list" aria-labelledby="delete-heading">
+        <div class="panel-heading"><span class="panel-index panel-index--warning">02</span><div><h2 id="delete-heading">登録済み手順書</h2><p>改訂日の更新、または削除ができます。</p></div></div>
+        <div class="admin-search search-field"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m21 21-4.35-4.35m2.1-5.4a7.5 7.5 0 1 1-15 0 7.5 7.5 0 0 1 15 0Z"/></svg><input id="admin-search" type="search" placeholder="文書番号、タイトルで検索" autocomplete="off"></div>
+        <div class="admin-results-bar"><span id="admin-result-count"></span></div>
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th scope="col">文書番号</th>
+              <th scope="col">分類</th>
+              <th scope="col">タイトル</th>
+              <th scope="col">改訂日</th>
+              <th scope="col">手順書</th>
+              <th scope="col">RA</th>
+            </tr>
+          </thead>
+          <tbody id="admin-list" class="admin-list"></tbody>
+        </table>
+        <div id="admin-empty" class="admin-empty" hidden>検索条件に一致する手順書がありません。</div>
+      </section>
+    </div>
+    <aside class="notice"><strong>運用メモ</strong><span>共有する手順書情報は `manuals.json` で管理します。この画面での変更はブラウザ内のプレビュー用です。</span></aside>
+  </main>
+  <footer><span>MANUAL HUB</span><span>Internal knowledge portal</span></footer>
+  <script src="admin.js"></script>
+</body>
+</html>
