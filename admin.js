@@ -13,6 +13,10 @@ function persist(items) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
 }
 
+function demoRiskAssessmentUrl(no) {
+  return `https://sharepoint.example.com/risk-assessments/${no}`;
+}
+
 async function loadMetadata() {
   try {
     // シンプルな相対パスで読み込む
@@ -48,7 +52,10 @@ function renderList() {
   const query = search.value.toLocaleLowerCase("ja-JP").replace(/\s/g, "");
   const filteredDocuments = allDocuments().filter((item) => !query || `${item.no}${item.title}${item.categoryName}`.toLocaleLowerCase("ja-JP").replace(/\s/g, "").includes(query));
   resultCount.textContent = `${filteredDocuments.length}件`;
-  list.innerHTML = filteredDocuments.map((item) => `<div class="admin-list__item"><div><strong>${item.no}</strong><span>${item.title}</span><small>${item.categoryName}</small></div><label class="date-editor"><span>改訂日</span><input type="date" data-date-no="${item.no}" value="${item.date}"><button type="button" class="date-button" data-save-date="${item.no}">更新</button></label><button type="button" class="delete-button" data-no="${item.no}">削除</button></div>`).join("");
+  list.innerHTML = filteredDocuments.map((item) => {
+    const riskAssessmentUrl = item.riskAssessmentUrl || demoRiskAssessmentUrl(item.no);
+    return `<div class="admin-list__item"><div><strong>${item.no}</strong><span>${item.title}</span><small>${item.categoryName}</small></div><label class="date-field">改訂日<input data-date-no="${item.no}" type="date" value="${item.date}"></label><a class="open-link" href="${item.url}" target="_blank" rel="noopener noreferrer">本体を開く ↗</a><a class="open-link" href="${riskAssessmentUrl}" target="_blank" rel="noopener noreferrer">リスクアセスメントを開く ↗</a><div class="item-actions"><button type="button" class="secondary-button" data-save-date="${item.no}">保存</button><button type="button" class="delete-button" data-no="${item.no}">削除</button></div></div>`;
+  }).join("");
   empty.hidden = filteredDocuments.length !== 0;
   list.querySelectorAll(".delete-button").forEach((button) => button.addEventListener("click", () => removeDocument(button.dataset.no)));
   list.querySelectorAll("[data-save-date]").forEach((button) => button.addEventListener("click", () => updateDate(button.dataset.saveDate)));
@@ -90,7 +97,7 @@ function registerDocument(event) {
     title: formData.get("title").trim(), 
     date: formData.get("date"), 
     url: formData.get("url").trim(),
-    riskAssessmentUrl: formData.get("riskAssessmentUrl").trim() || null
+    riskAssessmentUrl: formData.get("riskAssessmentUrl").trim() || demoRiskAssessmentUrl(formData.get("no").trim())
   };
   if (!form.reportValidity()) return;
   if (allDocuments().some((document) => document.no === item.no)) {
