@@ -35,7 +35,19 @@
         <div class="panel-heading"><span class="panel-index panel-index--warning">02</span><div><h2 id="delete-heading">登録済み手順書</h2><p>改訂日の更新、または削除ができます。</p></div></div>
         <div class="admin-search search-field"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m21 21-4.35-4.35m2.1-5.4a7.5 7.5 0 1 1-15 0 7.5 7.5 0 0 1 15 0Z"/></svg><input id="admin-search" type="search" placeholder="文書番号、タイトルで検索" autocomplete="off"></div>
         <div class="admin-results-bar"><span id="admin-result-count"></span></div>
-        <div id="admin-list" class="admin-list"></div>
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th scope="col">文書番号</th>
+              <th scope="col">分類</th>
+              <th scope="col">タイトル</th>
+              <th scope="col">改訂日</th>
+              <th scope="col">手順書</th>
+              <th scope="col">RA</th>
+            </tr>
+          </thead>
+          <tbody id="admin-list" class="admin-list"></tbody>
+        </table>
         <div id="admin-empty" class="admin-empty" hidden>検索条件に一致する手順書がありません。</div>
       </section>
     </div>
