@@ -48,7 +48,7 @@ function renderList() {
   const query = search.value.toLocaleLowerCase("ja-JP").replace(/\s/g, "");
   const filteredDocuments = allDocuments().filter((item) => !query || `${item.no}${item.title}${item.categoryName}`.toLocaleLowerCase("ja-JP").replace(/\s/g, "").includes(query));
   resultCount.textContent = `${filteredDocuments.length}件`;
-  list.innerHTML = filteredDocuments.map((item) => `<div class="admin-list__item"><div><strong>${item.no}</strong><span>${item.title}</span><small>${item.categoryName}</small></div><label class="delete-label"><input class="delete-button" type="checkbox" data-no="${item.no}"><span>削除</span></label><div class="date-update"><input class="date-input" type="date" value="${item.date}" data-date-no="${item.no}"><button class="update-button" data-save-date="${item.no}">更新</button></div></div>`).join("");
+  list.innerHTML = filteredDocuments.map((item) => `<div class="admin-list__item"><div><strong>${item.no}</strong><span>${item.title}</span><small>${item.categoryName}</small></div><label class="date-editor"><span>改訂日</span><input type="date" data-date-no="${item.no}" value="${item.date}"><button type="button" class="date-button" data-save-date="${item.no}">更新</button></label><button type="button" class="delete-button" data-no="${item.no}">削除</button></div>`).join("");
   empty.hidden = filteredDocuments.length !== 0;
   list.querySelectorAll(".delete-button").forEach((button) => button.addEventListener("click", () => removeDocument(button.dataset.no)));
   list.querySelectorAll("[data-save-date]").forEach((button) => button.addEventListener("click", () => updateDate(button.dataset.saveDate)));
@@ -83,7 +83,15 @@ function registerDocument(event) {
   event.preventDefault();
   const formData = new FormData(form);
   const category = metadata.categories.find((item) => item.code === formData.get("category"));
-  const item = { no: formData.get("no").trim(), category: category.code, categoryName: category.name, title: formData.get("title").trim(), date: formData.get("date"), url: formData.get("url").trim() };
+  const item = { 
+    no: formData.get("no").trim(), 
+    category: category.code, 
+    categoryName: category.name, 
+    title: formData.get("title").trim(), 
+    date: formData.get("date"), 
+    url: formData.get("url").trim(),
+    riskAssessmentUrl: formData.get("riskAssessmentUrl").trim() || null
+  };
   if (!form.reportValidity()) return;
   if (allDocuments().some((document) => document.no === item.no)) {
     message.textContent = "この文書番号はすでに登録されています。";
