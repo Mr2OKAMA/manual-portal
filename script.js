@@ -77,7 +77,7 @@ function renderList(items) {
       <td class="title-cell">${item.title}</td>
       <td class="date-cell">${formatDate(item.date)}</td>
       <td class="action-column"><a class="open-link" href="${item.url}" target="_blank" rel="noopener noreferrer">開く <span aria-hidden="true">↗</span></a></td>
-      <td class="action-column"><a class="open-link" href="${item.riskAssessmentUrl || '#'}" target="_blank" rel="noopener noreferrer" ${!item.riskAssessmentUrl ? 'disabled aria-disabled="true" style="opacity: 0.5; cursor: not-allowed;"' : ''}>開く <span aria-hidden="true">↗</span></a></td>
+      <td class="action-column"><a class="open-link" href="${item.riskAssessmentUrl || '#'}" target="_blank" rel="noopener noreferrer" ${!item.riskAssessmentUrl ? 'disabled aria-disabled="true" style="opacity: 0.5; cursor: not-allowed;"' : ''}>開く <span aria-hidden="true">↗</span></a> <span class="ra-label">RA</span></td>
     </tr>`).join("");
   elements.empty.hidden = filteredDocuments.length !== 0;
 }
