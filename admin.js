@@ -19,13 +19,10 @@ function demoRiskAssessmentUrl(no) {
 
 async function loadMetadata() {
   try {
-    // シンプルな相対パスで読み込む
     const response = await fetch("./manuals.json");
-    
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}: manuals.json が見つかりません。リポジトリルートで python3 -m http.server 8000 を実行してください。`);
     }
-    
     const loadedMetadata = await response.json();
     if (!Array.isArray(loadedMetadata.categories) || !Array.isArray(loadedMetadata.documents)) {
       throw new Error("手順書メタデータの形式が不正です。categories と documents は配列である必要があります。");
@@ -54,7 +51,7 @@ function renderList() {
   resultCount.textContent = `${filteredDocuments.length}件`;
   list.innerHTML = filteredDocuments.map((item) => {
     const riskAssessmentUrl = item.riskAssessmentUrl || demoRiskAssessmentUrl(item.no);
-    return `<div class="admin-list__item"><div><strong>${item.no}</strong><span>${item.title}</span><small>${item.categoryName}</small></div><label class="date-field">改訂日<input data-date-no="${item.no}" type="date" value="${item.date}"></label><a class="open-link" href="${item.url}" target="_blank" rel="noopener noreferrer">本体を開く ↗</a><a class="open-link" href="${riskAssessmentUrl}" target="_blank" rel="noopener noreferrer">リスクアセスメントを開く ↗</a><div class="item-actions"><button type="button" class="secondary-button" data-save-date="${item.no}">保存</button><button type="button" class="delete-button" data-no="${item.no}">削除</button></div></div>`;
+    return `<div class="admin-list__item"><div><strong>${item.no}</strong><span>${item.title}</span><small>${item.categoryName}</small></div><label class="date-field">改訂日<input data-date-no="${item.no}" type="date" value="${item.date}"></label><a class="open-link" href="${item.url}" target="_blank" rel="noopener noreferrer">手順書を開く <span aria-hidden="true">↗</span></a><a class="open-link" href="${riskAssessmentUrl}" target="_blank" rel="noopener noreferrer">RAを開く <span aria-hidden="true">↗</span></a><div class="item-actions"><button type="button" class="secondary-button" data-save-date="${item.no}">保存</button><button type="button" class="delete-button" data-no="${item.no}">削除</button></div></div>`;
   }).join("");
   empty.hidden = filteredDocuments.length !== 0;
   list.querySelectorAll(".delete-button").forEach((button) => button.addEventListener("click", () => removeDocument(button.dataset.no)));
@@ -90,12 +87,12 @@ function registerDocument(event) {
   event.preventDefault();
   const formData = new FormData(form);
   const category = metadata.categories.find((item) => item.code === formData.get("category"));
-  const item = { 
-    no: formData.get("no").trim(), 
-    category: category.code, 
-    categoryName: category.name, 
-    title: formData.get("title").trim(), 
-    date: formData.get("date"), 
+  const item = {
+    no: formData.get("no").trim(),
+    category: category.code,
+    categoryName: category.name,
+    title: formData.get("title").trim(),
+    date: formData.get("date"),
     url: formData.get("url").trim(),
     riskAssessmentUrl: formData.get("riskAssessmentUrl").trim() || demoRiskAssessmentUrl(formData.get("no").trim())
   };
