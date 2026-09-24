@@ -28,6 +28,7 @@ GitHub Pagesは静的ホスティングのため、管理画面での変更は�
 一覧画面や各サブページ上部の「JSONエディター」リンク、または [公開JSONエディター](https://mr2okama.github.io/manual-portal/json-editor.html) から `json-editor.html` を開くと、`manuals.json` を初期表示した状態で JSON を編集できます。
 
 - `JSONファイルを開く`: UTF-8 の `.json` ファイルをローカルから読み込み
+- `documents` 個別編集: `no` / `category` / `categoryName` / `title` / `date` / `url` をフォームから編集し、JSON テキストと双方向同期
 - `構文チェック`: JSON の妥当性を確認し、エラー時は位置情報付きで表示
 - `整形` / `圧縮`: pretty print と minify を実行
 - `JSONをダウンロード`: 編集結果をローカルへ保存
