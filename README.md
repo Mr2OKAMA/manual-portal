@@ -13,12 +13,23 @@
 - `admin.html`: サイト上で登録・削除を行う管理画面
 - `admin.js`: 管理画面の処理とブラウザ保存
 - `id-rules.html`: マニュアル管理番号の命名ルール一覧
+- `json-editor.html`: ブラウザだけで使える JSON エディター
+- `json-editor.js`: JSON の読み込み・整形・圧縮・検証・ダウンロード処理
 
 ## Site administration
 
 一覧画面右上の「管理画面」から `admin.html` を開きます。文書番号、分類、タイトル、改訂日、SharePoint URLを入力して登録すると、一覧画面へ反映[...]
 
 GitHub Pagesは静的ホスティングのため、管理画面での変更は操作したブラウザの `localStorage` に保存されるプレビュー用の差分です。全ユーザーで共[...]
+
+## JSON editor
+
+一覧画面や各サブページ上部の「JSONエディター」リンクから `json-editor.html` を開くと、`manuals.json` を初期表示した状態で JSON を編集できます。
+
+- `JSONファイルを開く`: UTF-8 の `.json` ファイルをローカルから読み込み
+- `構文チェック`: JSON の妥当性を確認し、エラー時は位置情報付きで表示
+- `整形` / `圧縮`: pretty print と minify を実行
+- `JSONをダウンロード`: 編集結果をローカルへ保存
 
 ## Data maintenance
 
