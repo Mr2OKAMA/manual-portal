@@ -57,7 +57,7 @@
           <p><strong>現在のファイル名:</strong> <span id="current-file-name">manuals.json</span></p>
           <p><strong>ショートカット:</strong> <span class="inline-code">Ctrl / Cmd + S</span> でダウンロード</p>
         </div>
-        <aside class="notice editor-help"><strong>使い方</strong><span>JSON が無効な場合は行番号・列番号を表示します。整形・圧縮・ダウンロードは有効な JSON のときだけ実行されます。編集内容はこのブラウザの一時保存にも保持されます。</span></aside>
+        <aside class="notice editor-help"><strong>使い方</strong><span>JSON が有効なときは <span class="inline-code">documents</span> を下段フォームからも編集できます。無効な場合は行番号・列番号を表示し、フォーム反映は停止します。整形・圧縮・ダウンロードは有効な JSON のときだけ実行されます。編集内容はこのブラウザの一時保存にも保持されます。</span></aside>
       </section>
 
       <section class="admin-panel" aria-labelledby="editor-heading">
@@ -74,6 +74,22 @@
         </div>
       </section>
     </div>
+
+    <section class="admin-panel document-editor-panel" aria-labelledby="document-editor-heading">
+      <div class="panel-heading">
+        <span class="panel-index">03</span>
+        <div>
+          <h2 id="document-editor-heading">documents 個別編集</h2>
+          <p><span class="inline-code">no / category / categoryName / title / date / url</span> をフォームから個別に編集できます。</p>
+        </div>
+      </div>
+      <div class="document-editor-toolbar">
+        <p id="document-editor-summary" class="document-editor-summary">有効な JSON を読み込むと documents を表示します。</p>
+        <button id="add-document-button" class="primary-button" type="button"><span aria-hidden="true">＋</span> 文書を追加</button>
+      </div>
+      <div id="document-editor-state" class="document-editor-state" role="status" aria-live="polite">JSON を検証すると、documents の各要素をここで個別編集できます。</div>
+      <div id="document-editor-list" class="document-editor-list" aria-describedby="document-editor-state"></div>
+    </section>
   </main>
   <footer><span>MANUAL HUB</span><span>Internal knowledge portal</span></footer>
   <script src="json-editor.js"></script>
